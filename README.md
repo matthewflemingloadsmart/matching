@@ -1,14 +1,18 @@
 <h1>Company Dedup</h1>
 <p>This matches companies in one file to a 'target list' in another csv. The primary use case was to match tradeshow and events lists against a target account list.</p>
-<p>We tried multiple approaches, including brute force / fuzzy matching across the whole dataset, but found the following approach gave the best results, fastest. It can match roughly 2,200 companies against a 259 </p>
-<p>This approach: , , then .</p>
+<p>We tried multiple approaches, including brute force / fuzzy matching across the whole dataset, but found the following approach gave the best results, fastest.</p>
+<h2>Sample Performance</h2>
+<p>This performed roughly 65 times faster than our brute force / levenshtein distance on the same dataset</p>
+<p>3.5 seconds to match 2,220 names against 250 companies</p>
+<h2>How It Works</h2>
+<p>This approach: </p>
 <ul>
-<li>Take three command line arguments: target-account-list, file-to-match, minimum-similarity-score</li>
+<li>Takes three command line arguments: target-account-list, file-to-match, minimum-similarity-score</li>
 <li>Pre Processes the Company Names: Remove llc, inc, punctuation</li>
 <li>Vectorizes the company names as 3 letter n-grams</li>
 <li>Places them in a sparse matrix</li>
 <li>Does sparse matrix multiplication</li>
-<li>oOutputs the matches to a csv where only those with a high enough similarity are shown</li>
+<li>Outputs the matches to a csv where only those with a high enough similarity are shown</li>
 </ul>
 <h2>Required Packages</h2>
 <ul>
@@ -24,6 +28,6 @@
 <li>import time</li>
 <li>import string</li>
 </ul>
-<h2>Examples</h2>
+<h2>Example</h2>
 <p>python match-companies.py targetAccounts.csv sampleFile.csv 95</p>
 
