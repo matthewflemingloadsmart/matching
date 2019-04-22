@@ -8,11 +8,17 @@
 <p>This approach: </p>
 <ul>
 <li>Takes three command line arguments: target-account-list, file-to-match, minimum-similarity-score</li>
-<li>Pre Processes the Company Names: Remove llc, inc, punctuation</li>
+<li>Pre Processes the Company Names:
+    <ul>
+        <li>Removes all punctuation</li>
+        <li>Transforms string to lowercase</li>
+        <li>Uses CleanCo module to extract clean company name (Removes llc, inc, incorprated, corp corporation etc...)</li>
+        </ul>
+</li>
 <li>Vectorizes the company names as 3 letter n-grams</li>
 <li>Places them in a sparse matrix</li>
 <li>Does sparse matrix multiplication</li>
-<li>Outputs the matches to a csv where only those with a high enough similarity are shown</li>
+<li>Outputs the matches to a csv where only those with a high enough similarity are shown (see system argument above</li>
 </ul>
 <h2>Required Packages</h2>
 <ul>
