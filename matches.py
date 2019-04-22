@@ -10,20 +10,16 @@ import sparse_dot_topn.sparse_dot_topn as ct
 import time
 import string
 
-
-
 try:
     goldenFile = sys.argv[1]
     matchFile = sys.argv[2]
     matchPercentage = sys.argv[3]
 
 except Exception as e:
-    print 'some error'
-
+    print 'Error with system arguments: ' + str(e)
 
 targetAccounts = pd.read_csv(goldenFile)
 matchList = pd.read_csv(matchFile)
-
 
 def ngrams(string, n=2):
     x = cleanco(str(string).lower()).clean_name()
@@ -122,9 +118,7 @@ for index, row in targetAccounts.iterrows():
 tf_idf_matrix_matches = vectorizer.fit_transform(matchList['Clean Company'])
 tf_idf_matrix_targets = vectorizer.transform(targetAccounts['Clean Target'])
 
-
 matches = awesome_cossim_top(tf_idf_matrix_matches, tf_idf_matrix_targets.transpose(), 1, 0)
-print type(matches)
 t = time.time()-t1
 print("SELFTIMED:", t)
 
