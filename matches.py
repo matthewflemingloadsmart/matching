@@ -77,10 +77,8 @@ def get_matches_df(sparse_matrix, A, B, C, D, top=100):
     accountOwner = np.empty([nr_matches], dtype=object)
     ownerId = np.empty([nr_matches], dtype=object)
     title = np.empty([nr_matches], dtype=object)
-    
     similairity = np.zeros(nr_matches)
     
-
     for index in range(0, nr_matches):
         left_side[index] = A[sparserows[index]]
         right_side[index] = B[sparsecols[index]]
@@ -92,8 +90,6 @@ def get_matches_df(sparse_matrix, A, B, C, D, top=100):
         accountId[index] = D.loc[sparsecols[index], 'Account ID']
         accountOwner[index] = D.loc[sparsecols[index], 'Account Owner']
         ownerId[index] = D.loc[sparsecols[index], 'User ID (Adult)']
-
-
         similairity[index] = sparse_matrix.data[index]
 
     return pd.DataFrame({'original_company': left_side,
@@ -109,15 +105,12 @@ def get_matches_df(sparse_matrix, A, B, C, D, top=100):
                          'similairity': similairity})
 t1 = time.time()
 
-vectorizer = TfidfVectorizer(min_df=1, analyzer=ngrams)
 stopwords = {'the'}
-
 
 for index, row in matchList.iterrows():
     tempString = cleanco(matchList.iloc[index]['company'].lower()).clean_name()
     resultwords  = [word for word in re.split("\W+",tempString) if word.lower() not in stopwords]
     result = ' '.join(resultwords)
-
     matchList.at[index,'Clean Company'] = result.translate(None, string.punctuation)
 
 for index, row in targetAccounts.iterrows():
@@ -125,10 +118,8 @@ for index, row in targetAccounts.iterrows():
     resultwords  = [word for word in re.split("\W+",tempString) if word.lower() not in stopwords]
     result = ' '.join(resultwords)
     targetAccounts.at[index,'Clean Target'] = result.translate(None, string.punctuation)
-    #print tempString.translate(None, string.punctuation)
-    #time.sleep(0.05)
 
-targetAccounts.to_csv('here.csv')
+vectorizer = TfidfVectorizer(min_df=1, analyzer=ngrams)
 tf_idf_matrix_matches = vectorizer.fit_transform(matchList['Clean Company'])
 tf_idf_matrix_targets = vectorizer.transform(targetAccounts['Clean Target'])
 
