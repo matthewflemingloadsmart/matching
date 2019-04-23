@@ -9,11 +9,12 @@ from scipy.sparse import csr_matrix
 import sparse_dot_topn.sparse_dot_topn as ct
 import time
 import string
+import re
 
 try:
     goldenFile = sys.argv[1]
     matchFile = sys.argv[2]
-    matchPercentage = sys.argv[3]
+    matchPercentage = int(sys.argv[3])/100
 
 except Exception as e:
     print 'Error with system arguments: ' + str(e)
@@ -75,6 +76,7 @@ def get_matches_df(sparse_matrix, A, B, C, D, top=100):
     accountId = np.empty([nr_matches], dtype=object)
     accountOwner = np.empty([nr_matches], dtype=object)
     ownerId = np.empty([nr_matches], dtype=object)
+    title = np.empty([nr_matches], dtype=object)
     
     similairity = np.zeros(nr_matches)
     
@@ -86,6 +88,7 @@ def get_matches_df(sparse_matrix, A, B, C, D, top=100):
         lastName[index] = C.loc[sparserows[index], 'last_name']
         phone[index] = C.loc[sparserows[index], 'phone']
         email[index] = C.loc[sparserows[index], 'email']
+        title[index] = C.loc[sparserows[index], 'title']
         accountId[index] = D.loc[sparsecols[index], 'Account ID']
         accountOwner[index] = D.loc[sparsecols[index], 'Account Owner']
         ownerId[index] = D.loc[sparsecols[index], 'User ID (Adult)']
@@ -93,8 +96,9 @@ def get_matches_df(sparse_matrix, A, B, C, D, top=100):
 
         similairity[index] = sparse_matrix.data[index]
 
-    return pd.DataFrame({'left_side': left_side,
-                         'right_side': right_side,
+    return pd.DataFrame({'original_company': left_side,
+                         'matched_company': right_side,
+                         'title': title,
                          'first_name':firstName,
                          'last_name':lastName,
                          'phone':phone,
@@ -106,15 +110,25 @@ def get_matches_df(sparse_matrix, A, B, C, D, top=100):
 t1 = time.time()
 
 vectorizer = TfidfVectorizer(min_df=1, analyzer=ngrams)
+stopwords = {'the'}
+
 
 for index, row in matchList.iterrows():
     tempString = cleanco(matchList.iloc[index]['company'].lower()).clean_name()
-    matchList.at[index,'Clean Company'] = tempString.translate(None, string.punctuation)
+    resultwords  = [word for word in re.split("\W+",tempString) if word.lower() not in stopwords]
+    result = ' '.join(resultwords)
+
+    matchList.at[index,'Clean Company'] = result.translate(None, string.punctuation)
 
 for index, row in targetAccounts.iterrows():
     tempString = cleanco(targetAccounts.iloc[index]['Account Name'].lower()).clean_name()
-    targetAccounts.at[index,'Clean Target'] = tempString.translate(None, string.punctuation)
+    resultwords  = [word for word in re.split("\W+",tempString) if word.lower() not in stopwords]
+    result = ' '.join(resultwords)
+    targetAccounts.at[index,'Clean Target'] = result.translate(None, string.punctuation)
+    #print tempString.translate(None, string.punctuation)
+    #time.sleep(0.05)
 
+targetAccounts.to_csv('here.csv')
 tf_idf_matrix_matches = vectorizer.fit_transform(matchList['Clean Company'])
 tf_idf_matrix_targets = vectorizer.transform(targetAccounts['Clean Target'])
 
@@ -123,9 +137,9 @@ t = time.time()-t1
 print("SELFTIMED:", t)
 
 matches_df = get_matches_df(matches, matchList['Clean Company'], targetAccounts['Clean Target'], matchList, targetAccounts, top=0)
-update = matches_df.loc[(matches_df['similairity'] > matchPercentage)]
+matches_df = matches_df.loc[(matches_df['similairity'] > matchPercentage)]
 
-update.to_csv('outputFile.csv')
+matches_df.to_csv('outputFile.csv')
 
     
 
