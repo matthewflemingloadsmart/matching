@@ -15,7 +15,7 @@ import clearbit
 from urlparse import urlparse
 import os
 
-clearbit.key = 'sk_c503d1799f222d4838ba71a4f2739e12'
+clearbit.key = ''
 
 try:
     targetAccountFile = sys.argv[1]
